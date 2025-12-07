@@ -1,6 +1,7 @@
 import PostItem, { Post } from "./PostItem";
+import React from "react";
 
-export default function PostList({ posts }: { posts: Post[] }) {
+function PostListComponent({ posts }: { posts: Post[] }) {
   return (
     <div>
       {posts.map((post) => (
@@ -9,3 +10,6 @@ export default function PostList({ posts }: { posts: Post[] }) {
     </div>
   );
 }
+
+const PostList = React.memo(PostListComponent);
+export default PostList;

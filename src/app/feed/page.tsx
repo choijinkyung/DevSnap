@@ -1,13 +1,27 @@
 "use client";
 
-import PostList from "@/src/components/feed/PostList";
-import { usePost } from "@/src/hooks/usePosts";
-import SkeletonPostItem from "@/src/components/feed/SkeletonPostItem";
+import PostList from "../../components/feed/PostList";
+import SkeletonPostItem from "../../components/feed/SkeletonPostItem";
+import { useInfinitePostsQuery } from "../../hooks/useInfinitePostsQuery";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 
 export default function FeedPage() {
-  const { posts, loading, error } = usePost();
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfinitePostsQuery();
 
-  if (loading)
+  const bottomRef = useInfiniteScroll(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+
+  if (isLoading) {
     return (
       <div>
         <h2>Feed</h2>
@@ -16,12 +30,34 @@ export default function FeedPage() {
         <SkeletonPostItem />
       </div>
     );
-  if (error) return <div>Error:{error}</div>;
+  }
+
+  if (isError) {
+    return <div>❌ Error loading posts</div>;
+  }
+
+  const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
     <div>
       <h2>Feed</h2>
-      <PostList posts={posts} />
+
+      <PostList posts={allPosts} />
+
+      <div ref={bottomRef} style={{ height: 40 }} />
+
+      {isFetchingNextPage && (
+        <>
+          <SkeletonPostItem />
+          <SkeletonPostItem />
+        </>
+      )}
+
+      {!hasNextPage && (
+        <div style={{ textAlign: "center", marginTop: "12px", color: "#999" }}>
+          No more posts.
+        </div>
+      )}
     </div>
   );
 }
