@@ -1,12 +1,16 @@
+import { useToggleLikeMutation } from "@/src/hooks/useToggleLikeMutation";
 import React from "react";
 export type Post = {
   id: number;
   username: string;
   image: string;
   caption: string;
+  likes: number; //number of likes
+  isLiked: boolean; // MySelf
 };
 
 function PostItem({ post }: { post: Post }) {
+  const { mutate: toggle } = useToggleLikeMutation(post.id);
   return (
     <div
       style={{
@@ -27,7 +31,23 @@ function PostItem({ post }: { post: Post }) {
           objectFit: "cover", // use to thumbnail, card img,profile round img
         }}
       ></img>
-      <div style={{ padding: "10px" }}>{post.caption}</div>
+      <div style={{ padding: "10px" }}>
+        <button
+          onClick={() => toggle({ isLiked: post.isLiked })}
+          style={{
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            fontSize: "20px",
+          }}
+        >
+          {post.isLiked ? "❤️" : "🤍"}
+        </button>
+
+        <span style={{ marginLeft: "8px" }}>{post.likes} likes</span>
+
+        <div style={{ marginTop: "6px" }}>{post.caption}</div>
+      </div>
     </div>
   );
 }

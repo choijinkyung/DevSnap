@@ -10,8 +10,22 @@ export async function fetchPostsPage({ pageParam = 1 }) {
     username: "eden",
     image: `https://picsum.photos/500/300?random=${pageParam}${i}`,
     caption: `Page ${pageParam} · Item ${i + 1}`,
+    likes: 0,
+    isLiked: false,
   }));
   const hasMore = pageParam < 5;
 
   return { posts: fakeData, nextPage: hasMore ? pageParam + 1 : null };
+}
+
+export async function toggleLike(
+  postId: number,
+  currentLiked: boolean,
+  currentLikes: number
+) {
+  await new Promise((r) => setTimeout(r, 500));
+  return {
+    isLiked: !currentLiked,
+    likes: currentLiked ? currentLikes - 1 : currentLikes + 1,
+  };
 }
