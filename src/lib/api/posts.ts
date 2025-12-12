@@ -1,31 +1,31 @@
-// src/lib/api/posts.ts
-import { Post } from "../../components/feed/PostItem";
+type ToggleLikeResponse = {
+  isLiked: boolean;
+  likes: number;
+};
 
-export async function fetchPostsPage({ pageParam = 1 }) {
-  // 테스트용 딜레이
-  await new Promise((r) => setTimeout(r, 600));
+export async function fetchPostsPage({ pageParam = 0 }) {
+  const res = await fetch(`/api/posts?cursor=${pageParam}`, { method: "GET" });
 
-  const fakeData: Post[] = Array.from({ length: 3 }).map((_, i) => ({
-    id: (pageParam - 1) * 3 + i + 1,
-    username: "eden",
-    image: `https://picsum.photos/500/300?random=${pageParam}${i}`,
-    caption: `Page ${pageParam} · Item ${i + 1}`,
-    likes: 0,
-    isLiked: false,
-  }));
-  const hasMore = pageParam < 5;
+  if (!res.ok) {
+    throw new Error("Failed to fetch posts");
+  }
 
-  return { posts: fakeData, nextPage: hasMore ? pageParam + 1 : null };
+  const data = await res.json();
+
+  return {
+    posts: data.posts,
+    nextPage: data.nextCursor,
+  };
 }
 
-export async function toggleLike(
-  postId: number,
-  currentLiked: boolean,
-  currentLikes: number
-) {
-  await new Promise((r) => setTimeout(r, 500));
-  return {
-    isLiked: !currentLiked,
-    likes: currentLiked ? currentLikes - 1 : currentLikes + 1,
-  };
+export async function toggleLike(postId: number): Promise<ToggleLikeResponse> {
+  const res = await fetch(`/api/likes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ postId }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to liked");
+  }
+  return res.json();
 }

@@ -8,7 +8,7 @@ import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 export default function FeedPage() {
   const {
     data,
-    isLoading,
+    isPending,
     isError,
     fetchNextPage,
     hasNextPage,
@@ -20,8 +20,9 @@ export default function FeedPage() {
       fetchNextPage();
     }
   });
+  const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
-  if (isLoading) {
+  if (allPosts.length === 0) {
     return (
       <div>
         <h2>Feed</h2>
@@ -35,8 +36,6 @@ export default function FeedPage() {
   if (isError) {
     return <div>❌ Error loading posts</div>;
   }
-
-  const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
     <div>

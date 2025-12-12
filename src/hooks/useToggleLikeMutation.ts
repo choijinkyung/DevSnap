@@ -5,11 +5,10 @@ export function useToggleLikeMutation(postId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ isLiked, likes }: { isLiked: boolean; likes: number }) =>
-      toggleLike(postId, isLiked, likes),
+    mutationFn: () => toggleLike(postId),
 
     //Optimistic update
-    onMutate: async ({ isLiked }) => {
+    onMutate: async () => {
       // 기존 쿼리 멈추기 (동시성 문제 방지)
       await queryClient.cancelQueries(["posts", "infinite"]);
 
@@ -28,8 +27,8 @@ export function useToggleLikeMutation(postId: number) {
               post.id === postId
                 ? {
                     ...post,
-                    isLiked: !isLiked,
-                    likes: post.likes + (isLiked ? -1 : +1),
+                    isLiked: !post.isLiked,
+                    likes: post.likes + (post.isLiked ? -1 : +1),
                   }
                 : post
             ),
@@ -47,7 +46,10 @@ export function useToggleLikeMutation(postId: number) {
 
     // 성공하면 쿼리 최신화
     onSuccess: () => {
-      //   queryClient.invalidateQueries(["posts", "infinite"]);
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "infinite"],
+        refetchType: "inactive",
+      });
     },
   });
 }
